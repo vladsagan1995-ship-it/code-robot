@@ -1,0 +1,23 @@
+{
+  "name": "Code Robot",
+  "short_name": "CodeBot",
+  "description": "Навчись Python, програмуючи робота у лабіринті!",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f0b1e",
+  "theme_color": "#7c3aed",
+  "lang": "uk",
+  "dir": "ltr",
+  "categories": ["education", "games"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
