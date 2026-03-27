@@ -1,7 +1,7 @@
 // animator.js — renders grid and animates Step[]
 
-const CELL = 52;        // px per cell (desktop)
-const CELL_SM = 38;     // px per cell (mobile ≤ 540px)
+const CELL_MAX    = 56;   // max px per cell (desktop)
+const CELL_MAX_SM = 46;   // max px per cell (mobile)
 
 // Direction rotation degrees for robot emoji
 const DIR_ROT = { 0: 0, 1: 90, 2: 180, 3: -90 };
@@ -20,17 +20,33 @@ class Animator {
     this._steps = [];
     this._gemEls = new Map();    // "r,c" → gem div
     this._level = null;
+    this._cellSize = CELL_MAX;
   }
 
-  get cellSize() {
-    return window.innerWidth <= 540 ? CELL_SM : CELL;
+  // Compute cell size to fit both screen width and height
+  calcCellSize(cols, rows) {
+    const isMobile = window.innerWidth <= 680;
+    const maxCell  = isMobile ? CELL_MAX_SM : CELL_MAX;
+
+    // Horizontal: fit grid in 92% of screen width
+    const availW   = Math.floor(window.innerWidth  * 0.92);
+    const availH   = Math.floor(window.innerHeight * 0.44); // grid takes ~44% height on mobile
+    const byWidth  = Math.floor(availW / cols);
+    const byHeight = Math.floor(availH / rows);
+
+    return Math.min(maxCell, byWidth, byHeight, isMobile ? 52 : 999);
   }
+
+  get cellSize() { return this._cellSize; }
 
   // ── Build grid DOM ──────────────────────────────────────────────────────
   buildGrid(level, gemKeys) {
     this._level = level;
     const grid = level.grid;
-    const cs = this.cellSize;
+
+    // Compute cell size dynamically to fit screen
+    this._cellSize = this.calcCellSize(grid[0].length, grid.length);
+    const cs = this._cellSize;
 
     this.container.innerHTML = "";
     this.container.style.gridTemplateColumns = `repeat(${grid[0].length}, ${cs}px)`;
@@ -50,14 +66,16 @@ class Animator {
         div.dataset.r = r;
         div.dataset.c = c;
 
+        const iconSize = `${Math.round(cs * 0.62)}px`;
+
         if (ch === "#") {
           div.classList.add("cell-wall");
-          div.textContent = "";
         } else if (ch === "E") {
           div.classList.add("cell-exit");
           const icon = document.createElement("span");
           icon.className = "cell-icon";
           icon.textContent = "🚪";
+          icon.style.fontSize = iconSize;
           div.appendChild(icon);
         } else {
           div.classList.add("cell-floor");
@@ -68,6 +86,7 @@ class Animator {
           const gem = document.createElement("span");
           gem.className = "gem";
           gem.textContent = "💎";
+          gem.style.fontSize = iconSize;
           div.appendChild(gem);
           this._gemEls.set(`${r},${c}`, gem);
         }
